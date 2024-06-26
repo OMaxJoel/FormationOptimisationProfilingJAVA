@@ -546,3 +546,199 @@ Minimisation des coûts en mémoire en réutilisant les instances et en utilisan
 | Weak References               | Gestion de caches ou de données temporaires                 |
 
 En appliquant ces techniques et en choisissant judicieusement les structures de données et les patterns de programmation, les développeurs Java peuvent optimiser efficacement leurs applications pour des performances maximales et une utilisation efficace des ressources système.
+
+
+### Applications Multithreadées
+
+Les applications multithreadées en Java nécessitent une gestion efficace des threads pour optimiser les performances et éviter les problèmes de synchronisation. Voici une exploration détaillée des concepts et outils pertinents.
+
+#### Cas d'Usage des Threads
+
+Les threads sont utilisés pour exécuter des tâches concurrentes et parallèles, améliorant ainsi l'efficacité et la réactivité des applications.
+
+**Avant :**
+```java
+// Exemple basique de création et d'exécution d'un thread
+Thread thread = new Thread(() -> {
+    // Logique du thread
+});
+thread.start();
+```
+
+**Après :**
+```java
+// Utilisation d'un ExecutorService pour gérer les threads
+ExecutorService executor = Executors.newFixedThreadPool(10);
+executor.submit(() -> {
+    // Logique du thread à exécuter
+});
+executor.shutdown();
+```
+
+**Tableau de Synthèse des Cas d'Usage des Threads :**
+
+| Cas d'Usage des Threads       | Utilisation                                                      |
+|-------------------------------|------------------------------------------------------------------|
+| Tâches asynchrones            | Exécution de traitements en arrière-plan                        |
+| Threads pool                 | Gestion efficace des ressources système avec un pool de threads  |
+| Parallélisme dans les boucles | Accélération du traitement des données avec des threads         |
+
+#### Problèmes de Synchronisation
+
+Les problèmes de synchronisation surviennent lorsque plusieurs threads accèdent simultanément aux mêmes ressources partagées, pouvant entraîner des incohérences et des blocages.
+
+**Avant :**
+```java
+// Exemple de bloc synchronized pour éviter les conditions de course
+public synchronized void incrementCounter() {
+    counter++;
+}
+```
+
+**Après :**
+```java
+// Utilisation de locks ReentrantLock pour une synchronisation plus flexible
+private final ReentrantLock lock = new ReentrantLock();
+public void incrementCounter() {
+    lock.lock();
+    try {
+        counter++;
+    } finally {
+        lock.unlock();
+    }
+}
+```
+
+**Tableau de Synthèse des Problèmes de Synchronisation :**
+
+| Problème de Synchronisation   | Utilisation                                                      |
+|-------------------------------|------------------------------------------------------------------|
+| Conditions de course           | Prévention des accès concurrents aux variables partagées         |
+| Blocages (deadlocks)           | Identification et résolution des situations bloquantes           |
+| Incohérences des données       | Maintien de la cohérence des données partagées entre threads     |
+
+#### Mécanismes de Base
+
+Les mécanismes de base incluent les primitives de synchronisation et les structures de données thread-safe pour assurer la cohérence et l'intégrité des données.
+
+**Avant :**
+```java
+// Exemple d'utilisation de AtomicInteger pour une incrémentation atomique
+private AtomicInteger atomicCounter = new AtomicInteger(0);
+public void incrementCounter() {
+    atomicCounter.incrementAndGet();
+}
+```
+
+**Après :**
+```java
+// Utilisation de ConcurrentHashMap pour un accès concurrent sécurisé
+private Map<String, Integer> concurrentMap = new ConcurrentHashMap<>();
+public void addToMap(String key, int value) {
+    concurrentMap.put(key, value);
+}
+```
+
+**Tableau de Synthèse des Mécanismes de Base :**
+
+| Mécanisme de Base             | Utilisation                                                      |
+|-------------------------------|------------------------------------------------------------------|
+| Primitives atomiques          | Opérations sûres et atomiques sur les variables partagées        |
+| Structures de données thread-safe | Accès concurrent sécurisé aux collections partagées             |
+| Gestion des exceptions        | Traitement sécurisé des erreurs et des exceptions                |
+
+#### Package java.util.concurrent
+
+Le package java.util.concurrent fournit des classes et des interfaces pour une gestion avancée des threads et des tâches asynchrones.
+
+**Avant :**
+```java
+// Exemple d'utilisation de ExecutorService pour exécuter des tâches asynchrones
+ExecutorService executor = Executors.newFixedThreadPool(5);
+Future<String> futureResult = executor.submit(() -> {
+    // Traitement asynchrone
+    return "Résultat";
+});
+executor.shutdown();
+```
+
+**Après :**
+```java
+// Utilisation de CompletableFuture pour le traitement asynchrone avec Java 8
+CompletableFuture.supplyAsync(() -> {
+    // Calcul asynchrone
+    return "Résultat";
+});
+```
+
+**Tableau de Synthèse des Capacités de java.util.concurrent :**
+
+| Capacité de java.util.concurrent | Utilisation                                                      |
+|----------------------------------|------------------------------------------------------------------|
+| ExecutorService                  | Gestion des pools de threads et exécution de tâches asynchrones   |
+| CompletableFuture                | Traitement asynchrone avec gestion simplifiée des futures         |
+| BlockingQueue                    | File d'attente pour la coordination entre threads                |
+
+#### Java 8 et l’Asynchronisme
+
+Java 8 introduit des fonctionnalités pour simplifier le traitement asynchrone avec l'utilisation de lambdas et de streams parallèles.
+
+**Avant :**
+```java
+// Exemple d'utilisation de Runnable avec Java 8
+Runnable task = () -> System.out.println("Traitement asynchrone");
+ExecutorService executor = Executors.newSingleThreadExecutor();
+executor.submit(task);
+executor.shutdown();
+```
+
+**Après :**
+```java
+// Utilisation de CompletableFuture avec Java 8 pour le traitement asynchrone
+CompletableFuture.supplyAsync(() -> "Résultat asynchrone")
+    .thenApplyAsync(result -> "Résultat transformé");
+```
+
+**Tableau de Synthèse des Fonctionnalités Asynchrones de Java 8 :**
+
+| Fonctionnalité Asynchrone Java 8 | Utilisation                                                      |
+|----------------------------------|------------------------------------------------------------------|
+| Lambda expressions               | Simplification de la syntaxe pour le traitement asynchrone       |
+| Stream parallèles                | Accélération du traitement des données avec l'évaluation parallèle |
+| CompletableFuture                | Gestion des opérations asynchrones avec des callbacks            |
+
+#### Reactive Programming
+
+La programmation réactive est une approche pour gérer les flux de données asynchrones avec une réactivité et une résilience accrues.
+
+**Avant :**
+```java
+// Exemple de traitement réactif avec Observable de RxJava
+Observable.just("Donnée")
+    .map(data -> data.toUpperCase())
+    .subscribe(result -> System.out.println("Résultat : " + result));
+```
+
+**Après :**
+```java
+// Utilisation de Flux de Reactor pour une programmation réactive avec Spring
+Flux.just("Donnée")
+    .map(data -> data.toLowerCase())
+    .subscribe(result -> System.out.println("Résultat : " + result));
+```
+
+**Tableau de Synthèse des Capacités de Reactive Programming :**
+
+| Capacité de Reactive Programming | Utilisation                                                      |
+|----------------------------------|------------------------------------------------------------------|
+| Flux et Mono (Reactor)           | Gestion des flux de données asynchrones avec des opérations réactives |
+| Observables (RxJava)             | Programmation réactive avec gestion des événements et des flux  |
+| Gestion des erreurs              | Réaction proactive aux erreurs et résilience des applications    |
+
+### Atelier Pratique
+
+Les ateliers pratiques permettent d'appliquer les concepts théoriques à des cas concrets d'optimisation et de diagnostic.
+
+- **Optimisation d’Application en Utilisant les Techniques Présentées :** Application des principes de gestion des threads, de synchronisation et de programmation réactive pour améliorer les performances.
+
+En utilisant ces techniques avancées et ces outils, les développeurs Java peuvent non seulement optimiser la performance de leurs applications multithreadées, mais aussi tirer parti de la réactivité et de la robustesse offertes par la programmation moderne en Java.
