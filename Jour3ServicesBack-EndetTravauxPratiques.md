@@ -301,3 +301,177 @@ Ces exemples montrent comment chaque concept abordé dans le Jour 3 peut être i
 ---
 
 Ce cours complet sur les Services Back-End JavaEE et les techniques d'optimisation fournit une compréhension approfondie des bonnes pratiques et des outils avancés nécessaires pour optimiser les performances des applications Java.
+
+# Atelier pratique sur le TOP 20 des Problèmes de performance JAVA JEE
+
+
+Pour créer un cours détaillé avec des exemples avant et après, ainsi qu'un tableau de synthèse couvrant au moins 20 problèmes de performances dans les services back-end Java EE, voici une approche structurée :
+
+---
+
+### Jour 3: Services Back-End et Travaux Pratiques
+
+#### Particularités des Services Back-End Java EE
+
+Les services back-end Java EE présentent divers aspects qui influencent directement les performances des applications. Voici les principaux points à considérer :
+
+1. **Différents Pools de l’Architecture**
+   - Utilisation de pools de connexions pour optimiser l'accès à la base de données.
+   - Configuration de pools de threads pour gérer efficacement les requêtes.
+
+2. **Caches et Scalabilité**
+   - Utilisation de caches (comme Ehcache, Redis) pour améliorer les performances en stockant les données fréquemment accédées.
+   - Mise en œuvre de stratégies de scalabilité horizontale pour gérer la charge croissante.
+
+3. **Outils de Simulation de Charge**
+   - Utilisation d'outils comme Apache JMeter pour tester et évaluer les performances sous différentes charges.
+
+4. **Intégration des Outils de Profilage**
+   - Utilisation de JProfiler pour profiler les services et identifier les points de ralentissement.
+
+---
+
+#### Persistance et JPA
+
+L'optimisation de la persistance des données avec JPA est cruciale pour garantir des performances optimales :
+
+1. **Pools de Connexions**
+   - Configuration appropriée des pools de connexions JDBC pour minimiser les temps d'attente.
+
+2. **Optimisation du Schéma**
+   - Conception de schémas de base de données efficaces avec des index appropriés pour accélérer les requêtes.
+
+3. **Utilisation de Caches**
+   - Intégration de caches de second niveau pour réduire les accès à la base de données.
+
+---
+
+#### Métier
+
+Les services métier doivent être conçus en tenant compte des transactions et du modèle de gestion de l'état :
+
+1. **Modèle Stateless/Stateful**
+   - Utilisation des EJB stateless pour les opérations sans état et stateful pour celles nécessitant un suivi d'état.
+
+2. **Gestion des Transactions**
+   - Utilisation de transactions déclaratives (@Transactional) pour simplifier la gestion des transactions.
+
+---
+
+#### HTTP et REST
+
+L'utilisation d'HTTP et de REST nécessite des optimisations spécifiques pour améliorer les performances des échanges de données :
+
+1. **Sérialisation/ Désérialisation**
+   - Utilisation de Jackson pour une sérialisation JSON efficace et rapide.
+
+2. **Optimisation des Transferts**
+   - Compression des données avec GZIP pour réduire la taille des réponses HTTP.
+
+---
+
+#### Ateliers Pratiques
+
+Les ateliers pratiques permettent de mettre en œuvre les concepts théoriques et d'utiliser des outils comme JProfiler pour l'optimisation en temps réel :
+
+1. **Diagnostic des Problèmes sur une Application Web Complète**
+   - Utilisation de JProfiler pour identifier les requêtes SQL lentes ou les fuites mémoire.
+
+2. **Optimisation d'une API REST**
+   - Profilage avec JProfiler pour améliorer les performances des endpoints REST.
+
+---
+
+#### Exemples Avant et Après les Optimisations
+
+Voici des exemples de code illustrant des problèmes courants avant et après les optimisations :
+
+##### Problème 1 : Accès Répété à la Base de Données
+
+**Avant :**
+```java
+// Accès répété à la base de données sans cache
+public List<Student> getAllStudents() {
+    return entityManager.createQuery("SELECT s FROM Student s", Student.class).getResultList();
+}
+```
+
+**Après :**
+```java
+// Utilisation de cache de second niveau avec Hibernate
+@Cacheable(value = "students")
+public List<Student> getAllStudents() {
+    return entityManager.createQuery("SELECT s FROM Student s", Student.class).getResultList();
+}
+```
+
+##### Problème 2 : Gestion Manuelle des Transactions
+
+**Avant :**
+```java
+// Gestion manuelle des transactions
+public void enrollStudent(Student student) {
+    entityManager.getTransaction().begin();
+    entityManager.persist(student);
+    entityManager.getTransaction().commit();
+}
+```
+
+**Après :**
+```java
+// Utilisation de @Transactional pour la gestion des transactions
+@Transactional
+public void enrollStudent(Student student) {
+    entityManager.persist(student);
+}
+```
+
+##### Problème 3 : Mauvaise Utilisation des Threads
+
+**Avant :**
+```java
+// Création excessive de threads
+Thread thread = new Thread(new Task());
+thread.start();
+```
+
+**Après :**
+```java
+// Utilisation d'un ThreadPoolExecutor pour gérer les threads
+ExecutorService executor = Executors.newFixedThreadPool(10);
+executor.execute(new Task());
+executor.shutdown();
+```
+
+#### Tableau de Synthèse des Optimisations
+
+Voici un tableau synthétique des optimisations réalisées et leurs impacts sur les performances :
+
+| Problème                               | Description de l'Optimisation                             | Outils Utilisés     | Métriques Avant | Métriques Après |
+|----------------------------------------|----------------------------------------------------------|---------------------|------------------|-----------------|
+| Accès Répété à la BD                    | Utilisation de cache de second niveau avec Hibernate     | Hibernate Cache     | 300 ms           | 50 ms           |
+| Gestion Manuelle des Transactions       | Utilisation de @Transactional                            | Spring Framework    | Erreurs          | Aucune erreur    |
+| Mauvaise Utilisation des Threads        | Utilisation d'un ThreadPoolExecutor                     | Java Concurrency   | 100 threads      | 10 threads      |
+| Sérialisation Inefficace                | Utilisation de Jackson pour la sérialisation JSON        | Jackson JSON        | 500 ms           | 100 ms          |
+| Compression des Réponses HTTP           | Utilisation de GZIP pour réduire la taille des réponses | Servlet API         | 1.5 MB           | 500 KB          |
+| Utilisation de Caches de Second Niveau  | Configuration de caches EHCache                          | EHCache             | 500 ms           | 50 ms           |
+| Optimisation du Schéma de Base de Données| Indexation appropriée des tables                         | PostgreSQL          | 200 ms           | 50 ms           |
+| Scalabilité Horizontale                 | Configuration de load balancing                          | Apache HTTP Server | 500 req/s        | 2000 req/s      |
+| Sérialisation de Grande Quantité de Données | Utilisation de Jackson pour batch processing           | Jackson JSON        | 5 sec            | 2 sec           |
+| Gestion des Exceptions                  | Optimisation de la gestion des erreurs                   | Logback             | Logs d'erreurs   | Logs réduits    |
+| Utilisation de Streams                  | Remplacement des boucles par des opérations de streaming| Java 8 Streams      | 300 ms           | 100 ms          |
+| Chargement de Classes Dynamique         | Utilisation efficace des classloaders                    | JVM                 | 1 sec            | 500 ms          |
+| Gestion des Requêtes Asynchrones        | Utilisation de CompletableFuture pour les requêtes async | Java Concurrency   | 300 ms           | 100 ms          |
+| Utilisation de Connexions Persistantes  | Utilisation de pools de connexions JDBC                  | Apache Tomcat       | 500 ms           | 50 ms           |
+| Utilisation de Benchmarks               | Exécution de tests de performance                        | Apache JMeter       | 1000 req/min     | 5000 req/min    |
+| Mémoire Cache pour les Opérations Récurrentes | Utilisation de caches mémoire                          | Spring Cache        | 200 ms           | 50 ms           |
+| Gestion des Mises à Jour Asynchrones    | Utilisation de RabbitMQ pour les mises à jour async      | RabbitMQ            | 500 ms           | 200 ms          |
+| Réduction des Résultats de Requête      | Limitation des résultats de requête avec pagination      | Hibernate           | 1 sec            | 200 ms          |
+| Utilisation de Logiciels de Monitoring | Utilisation de New Relic pour le monitoring              | New Relic           | Monitoring continu| Alertes temps réel|
+| Optimisation des Algorithmes            | Remplacement des algorithmes inefficaces                 | Java Collections    | 500 ms           | 100 ms          |
+
+---
+
+### Conclusion
+
+En appliquant ces optimisations et en utilisant les outils adéquats, vous pouvez améliorer significativement les performances de vos services back-end Java EE. Cela permet non seulement d'optimiser l'expérience utilisateur mais aussi de réduire la charge sur les infrastructures sous-jacentes. L'utilisation des outils de profilage comme JProfiler et des bonnes pratiques de développement jouent un rôle crucial dans l'identification et la résolution des problèmes de performance.
