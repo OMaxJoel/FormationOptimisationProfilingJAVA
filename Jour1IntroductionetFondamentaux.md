@@ -680,6 +680,134 @@ Ces ajustements permettent de mieux contrôler le comportement du GC et d'optimi
      - Modifier les paramètres de la JVM pour améliorer les performances du GC.
      - Comparer les résultats avant et après les modifications.
 
+### Atelier Pratique: Observation des Collectes avec JProfiler
+
+#### Introduction
+JProfiler est un outil puissant pour profiler les applications Java, en particulier pour observer et analyser le comportement du garbage collector (GC). Cet atelier pratique vous guide à travers les étapes de configuration et d'utilisation de JProfiler pour surveiller le GC, analyser les collectes de mémoire, identifier les objets non collectés, et optimiser les performances du GC en ajustant les paramètres de la JVM.
+
+#### 1. Configuration et Utilisation de JProfiler pour Surveiller le GC
+
+##### Étape 1: Installation de JProfiler
+1. Téléchargez et installez JProfiler depuis le site officiel.
+2. Configurez JProfiler pour qu'il puisse profiler votre application Java. Suivez les instructions d'installation pour intégrer JProfiler avec votre environnement de développement (par exemple, NetBeans, Eclipse, IntelliJ IDEA).
+
+##### Étape 2: Lancer l'Application avec JProfiler
+1. Démarrez JProfiler.
+2. Ouvrez votre application Java avec JProfiler en configurant les paramètres de lancement pour inclure les options de JProfiler.
+
+##### Étape 3: Surveiller le Garbage Collector
+1. Dans JProfiler, accédez à l'onglet "Memory" (Mémoire).
+2. Sélectionnez "Garbage Collector" pour afficher les informations relatives aux collectes de mémoire.
+3. Utilisez les graphiques et les métriques fournis pour surveiller l'activité du GC, y compris le nombre de collectes, le temps de collecte, et l'impact sur les différentes zones de mémoire (Young Generation, Old Generation).
+
+##### Exemple de Code:
+```java
+public class GCDemo {
+    public static void main(String[] args) {
+        for (int i = 0; i < 100000; i++) {
+            String temp = "String " + i; // Crée de nombreux objets temporaires
+        }
+    }
+}
+```
+
+##### Observation avec JProfiler:
+- **Avant:** Observer une fréquence élevée de collectes mineures et un impact significatif sur les performances de l'application.
+- **Après:** Après ajustement des paramètres de la JVM, observer une réduction des collectes mineures et une amélioration des performances globales.
+
+#### 2. Analyse des Collectes de Mémoire
+
+##### Étape 4: Identifier les Objets Non Collectés
+1. Dans l'onglet "Heap Walker" de JProfiler, capturez un snapshot de la mémoire.
+2. Analyser les instances d'objets pour identifier ceux qui ne sont pas collectés par le GC.
+3. Utilisez les outils de JProfiler pour naviguer dans les références d'objets et comprendre pourquoi certains objets ne sont pas éligibles pour la collecte.
+
+##### Exemple de Code:
+**Avant:**
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class MemoryLeakDemo {
+    private static List<String> list = new ArrayList<>();
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 100000; i++) {
+            list.add("String " + i); // Liste non nettoyée provoquant une fuite de mémoire
+        }
+    }
+}
+```
+
+**Après:**
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class MemoryLeakDemo {
+    private static List<String> list = new ArrayList<>();
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 100000; i++) {
+            if (list.size() > 50000) {
+                list.clear(); // Nettoyage périodique de la liste pour éviter les fuites de mémoire
+            }
+            list.add("String " + i);
+        }
+    }
+}
+```
+
+##### Analyse avec JProfiler:
+- **Avant:** Observer une augmentation continue de la mémoire utilisée par les objets dans la liste.
+- **Après:** Après avoir ajouté le nettoyage périodique, observer une réduction significative de la mémoire utilisée.
+
+#### 3. Tuning des Zones Mémoire et de l’Algorithme
+
+##### Étape 5: Modifier les Paramètres de la JVM
+1. Utilisez les options de la JVM pour ajuster la taille des zones de mémoire et choisir un algorithme de GC approprié.
+2. Paramètres courants pour le tuning du GC :
+   - `-Xms` : Taille initiale du heap.
+   - `-Xmx` : Taille maximale du heap.
+   - `-XX:+UseG1GC` : Utiliser le G1 GC.
+   - `-XX:NewRatio` : Ratio entre la Young Generation et la Old Generation.
+   - `-XX:SurvivorRatio` : Ratio entre les zones Survivor et Eden.
+   - `-XX:MaxGCPauseMillis` : Temps maximum de pause pour le GC.
+
+##### Exemple de Paramètres:
+**Avant:**
+```sh
+java -Xms256m -Xmx512m -XX:+UseParallelGC -jar MyApp.jar
+```
+
+**Après:**
+```sh
+java -Xms512m -Xmx1024m -XX:+UseG1GC -XX:NewRatio=2 -XX:SurvivorRatio=8 -XX:MaxGCPauseMillis=200 -jar MyApp.jar
+```
+
+##### Comparaison des Résultats
+1. Exécutez votre application avec les paramètres initiaux et observez les performances à l'aide de JProfiler.
+2. Modifiez les paramètres de la JVM comme indiqué ci-dessus et exécutez à nouveau l'application.
+3. Comparez les métriques de GC avant et après les modifications, en termes de fréquence des collectes, temps de pause, et utilisation de la mémoire.
+
+##### Tableau de Synthèse des Cas d'Usage
+
+| Cas d'Usage                  | Paramètre JVM                       | Description                                      | Impact                                |
+|------------------------------|-------------------------------------|--------------------------------------------------|---------------------------------------|
+| Taille initiale du heap      | `-Xms512m`                          | Augmente la mémoire initiale allouée             | Réduction des collectes mineures      |
+| Taille maximale du heap      | `-Xmx1024m`                         | Augmente la mémoire maximale allouée             | Amélioration des performances globales|
+| Utilisation du G1 GC         | `-XX:+UseG1GC`                      | Utilise l'algorithme de GC G1                    | Réduction des pauses de GC            |
+| Ratio Young/Old Generation   | `-XX:NewRatio=2`                    | Augmente la taille de la Young Generation        | Meilleure gestion des objets temporaires |
+| Ratio Survivor/Eden          | `-XX:SurvivorRatio=8`               | Augmente la taille des zones Survivor            | Réduction des promotions prématurées  |
+| Temps de pause max du GC     | `-XX:MaxGCPauseMillis=200`          | Limite la durée des pauses de GC                 | Amélioration de la réactivité         |
+| Taille initiale du GC Eden   | `-XX:InitialEdenSize=256m`          | Taille initiale de la zone Eden                  | Optimisation de la collecte mineure   |
+| Taille maximale du GC Eden   | `-XX:MaxEdenSize=512m`              | Taille maximale de la zone Eden                  | Réduction des collectes fréquentes    |
+| Taille de la zone Survivor   | `-XX:InitialSurvivorSize=64m`       | Taille initiale de la zone Survivor              | Amélioration des performances du GC   |
+| Nombre de threads du GC      | `-XX:ParallelGCThreads=4`           | Nombre de threads utilisés par le GC parallèle   | Accélération des collectes de GC      |
+
+Ces ajustements permettent d'optimiser le comportement du garbage collector en fonction des besoins spécifiques de votre application, améliorant ainsi les performances globales.
+
+
 **Exemples, Bonnes Pratiques et Synthèse**
 1. **Exemples Concrets:**
 
